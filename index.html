@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<title>Metamorph</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link href='http://fonts.googleapis.com/css?family=Noticia+Text' rel='stylesheet' type='text/css'>
+		<style>
+			body {
+				background-color: 	#000000;
+				margin: 			0px;
+				overflow: 			hidden;
+				font-family:		Monospace;
+				font-size:			13px;
+				text-align:			center;
+				font-weight: 		bold;
+				text-align:			center;
+			}
+
+			#info {
+				color: 				#FFFFFF;
+				position: 			absolute;
+ 				top: 				0px;
+				width: 				100%;
+				padding: 			5px;
+				z-index: 			0;
+				-moz-user-select: 	none; 	/* mozilla browsers */
+				-khtml-user-select: none; 	/* webkit browsers */				
+				font-family: 		'Noticia Text', serif;
+				font-size: 			20px;
+				/*font-size: 			12px;*/
+			}	
+			
+			#guiContainer {
+				position: absolute;
+				bottom: 20%;
+				right: 0;	
+				zoom: 1;									
+			}	
+
+
+			a {
+				color:#0078ff;
+			}			
+	
+		</style>
+
+	</head>
+
+
+	<body>
+	
+        <div id="guiContainer">			
+		</div>	
+				
+        <div id="info">	
+        	Please draw on this magical surface.
+		</div>
+		
+		<script type="text/javascript" src="js/dat-gui/build/dat.gui.js"></script>
+		<script src="js/Three.js"></script>
+		<script src='js/THREEx.WindowResize.js'></script>
+		<script src="js/RequestAnimationFrame.js"></script>		
+		<script src="js/metamorph.js"></script>		
+
+	</body>
+</html>	

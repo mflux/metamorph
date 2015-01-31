@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<title>Metamorph</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link href='http://fonts.googleapis.com/css?family=Ubuntu+Condensed' rel='stylesheet' type='text/css'>
+		<style>
+			body {
+				background-color: 	#FFFFFF;
+				margin: 			0px;
+				overflow: 			hidden;
+				font-family:		Monospace;
+				font-size:			13px;
+				text-align:			center;
+				font-weight: 		bold;
+				text-align:			center;
+			}
+
+			a {
+				color:#0078ff;
+			}
+		</style>
+
+		<script>
+			//	Some global constants that control everything
+			var controllers = {									
+			};				
+		</script>
+
+	</head>
+
+
+	<body>
+        <div id="guiContainer">			
+		</div>			
+
+		<script type="text/javascript" src="js/dat.gui.min.js"></script>
+		<script src="js/Three.js"></script>
+		<script src="js/RequestAnimationFrame.js"></script>		
+
+		<script>			
+			
+		    var camera, scene, renderer;
+			var mouseX = 0, mouseY = 0, pmouseX = 0, pmouseY = 0;
+			var width = window.innerWidth;
+			var height = window.innerHeight;	
+
+			var dragging = false;									
+
+		    function init() {
+
+		        //	-----------------------------------------------------------------------------
+		        //	All the initialization stuff for THREE
+		    	//	where in html to hold all our things
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );		    	
+		    	
+		    	//	scene
+		        scene = new THREE.Scene();		       
+
+
+		        //	-----------------------------------------------------------------------------
+		        //	Setup our renderer
+				renderer = new THREE.WebGLRenderer({antialias:true});
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				container.appendChild( renderer.domElement );
+
+
+
+		        //	-----------------------------------------------------------------------------
+		        //	Setup our camera
+		        camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000 );		        		        		        
+  				camera.position.z = 1900;
+  				camera.position.y = height/2;
+  				camera.lookAt(scene.width/2, scene.height/2);	
+  				scene.add( camera );
+
+
+
+		        //	-----------------------------------------------------------------------------
+		        //	Event listeners
+				container.addEventListener( 'mousemove', onDocumentMouseMove, false );
+				container.addEventListener( 'mousedown', onDocumentMouseDown, false );	
+				container.addEventListener( 'mouseup', onDocumentMouseUp, false );			
+		    }
+
+	
+
+		    function animate() {        		       
+		        requestAnimationFrame( animate );				  					  					    
+		        render();		       
+		    }
+
+		    function render() {				
+		        renderer.render( scene, camera );
+		    }
+
+		</script>
+
+
+		
+
+	</body>
+</html>	

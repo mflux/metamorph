@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<title>Metamorph</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<!-- <link href='http://fonts.googleapis.com/css?family=Noticia+Text' rel='stylesheet' type='text/css'> -->
+		<style>
+			body {
+				background-color: 	#000000;
+				margin: 			0px;
+				overflow: 			hidden;
+				font-family:		Monospace;
+				font-size:			13px;
+				text-align:			center;
+				font-weight: 		bold;
+				text-align:			center;
+			}
+
+			#info {
+				color: 				#FFFFFF;
+				position: 			absolute;
+ 				top: 				0px;
+				width: 				100%;
+				padding: 			5px;
+				z-index: 			0;
+				-moz-user-select: 	none; 	/* mozilla browsers */
+				-khtml-user-select: none; 	/* webkit browsers */
+				font-family: 		'Noticia Text', serif;
+				font-size: 			24px;
+			}
+
+			a {
+				color:#0078ff;
+			}
+		</style>
+
+		<script>
+			//	Some global constants that control everything
+			var controllers = function() {
+			}
+
+			var controls;
+			window.onload = function(){
+				controls = new controllers();
+				var gui = new dat.GUI();
+			}
+		</script>
+
+	</head>
+
+
+	<body>
+        <div id="guiContainer">
+		</div>
+		<script type="text/javascript" src="js/dat.gui.min.js"></script>
+		<script src="js/Three.js"></script>
+		<script src="js/RequestAnimationFrame.js"></script>
+
+		<script>
+
+		    var camera, scene, renderer;
+			var mouseX = 0, mouseY = 0, pmouseX = 0, pmouseY = 0;
+			var width = window.innerWidth;
+			var height = window.innerHeight;
+
+			var dragging = false;
+
+			init();
+			animate();
+
+		    function init() {
+
+		        //	-----------------------------------------------------------------------------
+		        //	All the initialization stuff for THREE
+		    	//	where in html to hold all our things
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
+
+				container.addEventListener( 'mousemove', onDocumentMouseMove, false );
+				container.addEventListener( 'mousedown', onDocumentMouseDown, false );
+		    	container.addEventListener( 'mouseup', onDocumentMouseUp, false );
+
+		    	//	scene
+		        scene = new THREE.Scene();
+
+
+
+		        //	-----------------------------------------------------------------------------
+		        //	Setup our renderer
+				renderer = new THREE.WebGLRenderer({antialias:true});
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				container.appendChild( renderer.domElement );
+
+
+
+		        //	-----------------------------------------------------------------------------
+		        //	Setup our camera
+		        camera = new THREE.OrthographicCamera( 0, window.innerWidth, 0, window.innerHeight);
+		        // camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 3000 );
+				camera.position.z = 1;
+				camera.position.x = -width/2;
+				camera.position.y = -height/2;
+  				scene.add( camera );
+
+				var snakeMat = new THREE.MeshBasicMaterial(
+					{
+						color: 0xFFFFFF,
+						wireframe: true,
+					}
+				);
+
+  				snake = new THREE.Object3D();
+  				var geo = new THREE.CubeGeometry(50,50,1);
+  				head = new THREE.Mesh(geo, snakeMat );
+  				snake.add(head);
+
+  				head.position.x = 0;
+  				head.position.y = 0;
+  				head.speed = 3.4;
+  				head.forward = new THREE.Vector2(0,-1);
+  				head.steer = new THREE.Vector2(0,0);
+
+  				body = new THREE.Object3D();
+  				var bodyCount = 16;
+  				for( var i=0; i<bodyCount; i++){
+  					var segment = new THREE.Mesh( geo, snakeMat );
+  					segment.position.x = head.position.x;
+  					segment.position.y = head.position.y;
+  					segment.scale.x = segment.scale.y = ((bodyCount+1) - i) / (bodyCount+2);
+  					body.add(segment);
+  				}
+  				snake.add(body);
+
+  				scene.add( snake );
+		    }
+
+			var snake;
+			var head;
+			var body;
+
+			var followMouse = false;
+
+
+
+		    function animate() {
+
+		    	if(followMouse){
+			    	var targetX = mouseX - head.position.x;
+			    	var targetY = mouseY - head.position.y;
+			    	var distToTarget = Math.sqrt( targetX * targetX + targetY * targetY);
+			    	if(distToTarget > 10 ){
+			    		head.steer.x = targetX;
+			    		head.steer.y = targetY;
+						head.speed = 3.4;
+					}
+					else{
+			    		head.speed = 0;
+					}
+				}
+				else{
+					head.speed = 3.4;
+			    	head.steer.x += (-1 + Math.random() * 2) * 0.2;
+			    	head.steer.y += (-1 + Math.random() * 2) * 0.2;
+				}
+
+
+		    	head.steer.normalize();
+
+		    	head.forward.addSelf( head.steer );
+		    	head.forward.normalize();
+
+		    	head.position.x += head.forward.x * head.speed;
+		    	head.position.y += head.forward.y * head.speed;
+
+	    		head.rotation.z = Math.atan2( -head.forward.y, -head.forward.x );
+
+		    	for( var i=0; i<body.children.length; i++ ){
+		    		var segment = body.children[i];
+		    		var prev;
+		    		if(i==0){
+		    			prev = head;
+		    		}
+		    		else{
+		    			prev = body.children[i-1];
+		    		}
+
+		    		var lenX = segment.position.x - prev.position.x;
+		    		var lenY = segment.position.y - prev.position.y;
+		    		var dist = Math.sqrt( lenX * lenX + lenY * lenY );
+		    		if(dist > 40){
+		    			var direction = new THREE.Vector2(lenX,lenY);
+		    			direction.normalize();
+		    			direction.multiplyScalar(40);
+		    			segment.position.x = prev.position.x + direction.x;
+		    			segment.position.y = prev.position.y + direction.y;
+		    			segment.rotation.z = Math.atan2(lenY, lenX);
+		    		}
+
+
+		    		var prevVecX = Math.cos( prev.rotation.z );
+		    		var prevVecY = Math.sin( prev.rotation.z );
+		    		var prevVec = new THREE.Vector3(prevVecX, prevVecY);
+		    		var thisVec = new THREE.Vector3(lenX, lenY);
+		    		thisVec.normalize();
+		    		var dotProduct = prevVec.dot( thisVec );
+		    		if( Math.abs(dotProduct) > 0.4){
+		    			prevVec.multiplyScalar(40);
+		    			var targetPos = new THREE.Vector3( prev.position.x, prev.position.y );
+		    			targetPos = targetPos.addSelf(prevVec);
+		    			segment.position.x = segment.position.x + (targetPos.x - segment.position.x) * 0.3;
+		    			segment.position.y = segment.position.y + (targetPos.y - segment.position.y) * 0.3;
+		    		}
+		    	}
+
+		        requestAnimationFrame( animate );
+		        render();
+		    }
+
+		    function render() {
+		        renderer.render( scene, camera );
+		    }
+
+			function onDocumentMouseDown( event ) {
+		        followMouse = true;
+			}
+
+			function onDocumentMouseUp( event ){
+				followMouse = false;
+			}
+
+			function onDocumentMouseMove( event ) {
+
+				pmouseX = mouseX;
+				pmouseY = mouseY;
+
+				mouseX = event.clientX - width/2;
+				mouseY = event.clientY - height/2;
+			}
+
+		</script>
+
+
+
+
+	</body>
+</html>
